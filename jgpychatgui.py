@@ -33,7 +33,7 @@ def connect():
 	chatWindowHeaderSpacing = Frame()
 	chatWindowHeaderSpacing.pack(padx=35, pady=20)
 	# User received messages box
-	receivedMessages = Entry(chatWindow, width=200, font="Times 20", justify=CENTER, background="#e5edf9",)
+	receivedMessages = Entry(chatWindow, width=50, font="Times 20", justify=CENTER, background="#e5edf9",)
 	receivedMessages.pack()
 	#Spacing
 	receivedMessagesSpacing = Frame()
