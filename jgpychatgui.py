@@ -4,6 +4,8 @@ import tkinter as tk
 import socket 
 import select 
 import sys 
+import os
+import signal
 from threading import Thread
 #Client side server socket
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -19,7 +21,7 @@ def connect():
 	#Receive message
 	def receive():
 		try:
-			message = str(socks.recv(2048).decode("utf-8"))
+			message = str(server.recv(2048).decode("utf-8"))
 			receivedMessages.insert(0, message)
 			chatWindow.update()
 		except:
@@ -36,42 +38,65 @@ def connect():
 	#      Chat Window     #
 	########################
 	
+	
+	def send():
+		message=messageBox.get()
+		server.send(bytes(message.encode("utf-8")))
+		messageList.insert(END,"[You]"+message)
+	#Receive messages
+	def receive():
+		while True:
+			try:
+				message = str(server.recv(2048).decode("utf-8"))
+				messageList.insert(END, message)
+			except OSERROR:
+				break
+	def onClosing():
+		chatWindow.destroy()
+		os.kill(os.getpid(),signal.SIGKILL)
+
 	chatWindow=tk.Tk()
 	chatWindow.title("JGPyChat - Chat Window")
+	#Message Frame
+	messagesFrame = tk.Frame(chatWindow)
+	messageBox = tk.StringVar()  
+	messageBox.set("")
 
-	#Spacing
-	chatWindowHeaderSpacing = Frame()
-	chatWindowHeaderSpacing.pack(padx=35, pady=20)
-	# User received messages box
-	receivedMessages = Entry(chatWindow, width=200, font="Times 20", justify=CENTER, background="#e5edf9",)
-	receivedMessages.pack()
-	#Spacing
-	receivedMessagesSpacing = Frame()
-	receivedMessagesSpacing.pack(padx=35, pady=20)
-	#User Entry box
-	messageBox = Entry(chatWindow, width=17, font="Times 20", justify=CENTER, background="#e5edf9",)
-	messageBox.pack()
-	#Spacing
-	sendButtonSpacing = Frame()
-	sendButtonSpacing.pack(padx=35, pady=20)
-	#Send buton
-	sendButton = Button(chatWindow, text="Send", width=25, height=2,command=send)
-	sendButton.pack()
+	scrollbar = tk.Scrollbar(messagesFrame)  
 	
-	#socket functionality
-	sockets = [sys.stdin, server] 
-	read_sockets,write_socket, error_socket = select.select(sockets,[],[]) 
-	for socks in read_sockets: 
-		if socks == server: 
-			receive()
-		else:  
-			send()
-			
-	#same window characteristics as the main window
-	chatWindow.geometry('%dx%d+%d+%d' % (w, h, x, y))
-	#Threading for received messages
+	# Contain messages in a listbox
+	messageList = tk.Listbox(messagesFrame, height=15, width=50, yscrollcommand=scrollbar.set)
+	scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+	messageList.pack(side=tk.LEFT, fill=tk.BOTH)
+	messageList.pack()
+	messagesFrame.pack()
+	# User entry box
+	entryBox = tk.Entry(chatWindow, textvariable=messageBox)
+	entryBox.bind("<Return>", send)
+	entryBox.pack()
+	send_button = tk.Button(chatWindow, text="Send", command=send)
+	send_button.pack()
+
+	#Completely close program
+	chatWindow.protocol("WM_DELETE_WINDOW", onClosing)
+	#Threading for receiving messages
 	receive_thread = Thread(target=receive)
 	receive_thread.start()
+
+	########################
+	#Place window in middle
+	########################
+	w = 395 # width for the Tk connectWindow
+	h = 380 # height for the Tk connectWindow
+	# get screen width and height
+	ws = chatWindow.winfo_screenwidth() # width of the screen
+	hs = chatWindow.winfo_screenheight() # height of the screen
+	# calculate x and y coordinates for the Tk connectWindow 
+	x = (ws/2) - (w/2)
+	y = (hs/2) - (h/2)
+	# set the dimensions of the screen and where it is placed
+	chatWindow.geometry('%dx%d+%d+%d' % (w, h, x, y))
+
 
 	chatWindow.mainloop()
 	
