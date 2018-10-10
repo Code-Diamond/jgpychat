@@ -9,17 +9,27 @@ import sys
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def connect():
-	try:
-		strPort=port.get()
-		intPort = int(strPort)
-		server.connect((serverIP.get(), intPort)) 
-		print("Connected")
-		root.destroy()
-		root2=tk.Tk()
-		root2.title("JGPyChat - Chat Window")
-		root2.mainloop()
-	except:
-		print("Unable to connect; bad address and port number!")
+	# try:
+	def send():
+		message=messageBox.get()
+		server.send(bytes(message.encode("utf-8")))
+	strPort=port.get()
+	intPort = int(strPort)
+	server.connect((serverIP.get(), intPort)) 
+	print("Connected")
+	root.destroy()
+	root2=tk.Tk()
+	root2.title("JGPyChat - Chat Window")
+	messageBox = Entry(root2, width=17, font="Times 20", justify=CENTER, background="#e5edf9",)
+	messageBox.pack()
+	sendBtn = Button(root2, text="Send", width=25, height=2,command=send)
+	sendBtn.pack()
+# 
+	root2.mainloop()
+	# except:
+	# 	print("Unable to connect; bad address and port number!")
+
+	 
 
 root = tk.Tk()
 
