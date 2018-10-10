@@ -2,9 +2,24 @@
 from tkinter import *
 import tkinter as tk
 
+import socket 
+import select 
+import sys 
+  
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
 def connect():
-	print(serverIP.get())
-	print(port.get())
+	try:
+		strPort=port.get()
+		intPort = int(strPort)
+		server.connect((serverIP.get(), intPort)) 
+		print("Connected")
+		root.destroy()
+		root2=tk.Tk()
+		root2.title("JGPyChat - Chat Window")
+		root2.mainloop()
+	except:
+		print("Unable to connect; bad address and port number!")
 
 root = tk.Tk()
 
