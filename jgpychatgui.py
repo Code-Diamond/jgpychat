@@ -4,6 +4,7 @@ import tkinter as tk
 import socket 
 import select 
 import sys 
+from threading import Thread
 #Client side server socket
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ########################
@@ -15,6 +16,15 @@ def connect():
 		message=messageBox.get()
 		server.send(bytes(message.encode("utf-8")))
 		receivedMessages.insert(END,"\n"+message)
+	#Receive message
+	def receive():
+		try:
+			message = str(socks.recv(2048).decode("utf-8"))
+			receivedMessages.insert(0, message)
+			chatWindow.update()
+		except:
+			print("Exception flag : 0")
+
 	#connect
 	intPort = int(port.get())
 	server.connect((serverIP.get(), intPort)) 
@@ -33,7 +43,7 @@ def connect():
 	chatWindowHeaderSpacing = Frame()
 	chatWindowHeaderSpacing.pack(padx=35, pady=20)
 	# User received messages box
-	receivedMessages = Entry(chatWindow, width=50, font="Times 20", justify=CENTER, background="#e5edf9",)
+	receivedMessages = Entry(chatWindow, width=200, font="Times 20", justify=CENTER, background="#e5edf9",)
 	receivedMessages.pack()
 	#Spacing
 	receivedMessagesSpacing = Frame()
@@ -53,13 +63,16 @@ def connect():
 	read_sockets,write_socket, error_socket = select.select(sockets,[],[]) 
 	for socks in read_sockets: 
 		if socks == server: 
-			message = str(socks.recv(2048).decode("utf-8"))
-			receivedMessages.insert(0, message)
+			receive()
 		else:  
 			send()
 			
 	#same window characteristics as the main window
 	chatWindow.geometry('%dx%d+%d+%d' % (w, h, x, y))
+	#Threading for received messages
+	receive_thread = Thread(target=receive)
+	receive_thread.start()
+
 	chatWindow.mainloop()
 	
 ########################
