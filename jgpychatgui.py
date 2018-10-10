@@ -14,24 +14,54 @@ def connect():
 	def send():
 		message=messageBox.get()
 		server.send(bytes(message.encode("utf-8")))
+		receivedMessages.insert(END,"\n"+message)
 	#connect
 	intPort = int(port.get())
 	server.connect((serverIP.get(), intPort)) 
 	print("Connected")
 	#distroy connect window
 	connectWindow.destroy()
+	
 	########################
 	#      Chat Window     #
 	########################
+	
 	chatWindow=tk.Tk()
 	chatWindow.title("JGPyChat - Chat Window")
+
+	#Spacing
+	chatWindowHeaderSpacing = Frame()
+	chatWindowHeaderSpacing.pack(padx=35, pady=20)
+	# User received messages box
+	receivedMessages = Entry(chatWindow, width=200, font="Times 20", justify=CENTER, background="#e5edf9",)
+	receivedMessages.pack()
+	#Spacing
+	receivedMessagesSpacing = Frame()
+	receivedMessagesSpacing.pack(padx=35, pady=20)
 	#User Entry box
 	messageBox = Entry(chatWindow, width=17, font="Times 20", justify=CENTER, background="#e5edf9",)
 	messageBox.pack()
-	#Send
+	#Spacing
+	sendButtonSpacing = Frame()
+	sendButtonSpacing.pack(padx=35, pady=20)
+	#Send buton
 	sendButton = Button(chatWindow, text="Send", width=25, height=2,command=send)
 	sendButton.pack()
+	
+	#socket functionality
+	sockets = [sys.stdin, server] 
+	read_sockets,write_socket, error_socket = select.select(sockets,[],[]) 
+	for socks in read_sockets: 
+		if socks == server: 
+			message = str(socks.recv(2048).decode("utf-8"))
+			receivedMessages.insert(0, message)
+		else:  
+			send()
+			
+	#same window characteristics as the main window
+	chatWindow.geometry('%dx%d+%d+%d' % (w, h, x, y))
 	chatWindow.mainloop()
+	
 ########################
 #      Main Window     #
 ########################
@@ -80,4 +110,5 @@ x = (ws/2) - (w/2)
 y = (hs/2) - (h/2)
 # set the dimensions of the screen and where it is placed
 connectWindow.geometry('%dx%d+%d+%d' % (w, h, x, y))
+
 connectWindow.mainloop()
