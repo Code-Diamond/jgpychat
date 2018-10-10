@@ -1,4 +1,4 @@
-# Python program to implement server side of chat room.
+#JGPyChatServer server side script
 import socket 
 import select 
 import sys 
