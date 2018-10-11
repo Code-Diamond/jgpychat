@@ -33,13 +33,13 @@ def clientThread(conn, addr):
                 continue
 #Broadcast messages
 def broadcast(message, connection): 
-    for clients in clients: 
-        if clients!=connection: 
+    for client in clients: 
+        if client!=connection: 
             try: 
-                clients.send(message) 
+                client.send(message) 
             except: 
-                clients.close() 
-                remove(clients) 
+                client.close() 
+                remove(client) 
 #Remove connection
 def remove(connection): 
     if connection in clients: 

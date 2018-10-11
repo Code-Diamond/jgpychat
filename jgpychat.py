@@ -13,20 +13,6 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #        Connect       #
 ########################
 def connect():
-	#Send message method
-	def send():
-		message=messageBox.get()
-		server.send(bytes(message.encode("utf-8")))
-		receivedMessages.insert(END,"\n"+message)
-	#Receive message
-	def receive():
-		try:
-			message = str(server.recv(2048).decode("utf-8"))
-			receivedMessages.insert(0, message)
-			chatWindow.update()
-		except:
-			print("Exception flag : 0")
-
 	#connect
 	intPort = int(port.get())
 	server.connect((serverIP.get(), intPort)) 
@@ -37,8 +23,8 @@ def connect():
 	########################
 	#      Chat Window     #
 	########################
-	
-	
+		
+		
 	def send():
 		message=messageBox.get()
 		server.send(bytes(message.encode("utf-8")))
@@ -47,9 +33,19 @@ def connect():
 	def receive():
 		while True:
 			try:
-				message = str(server.recv(2048).decode("utf-8"))
-				messageList.insert(END, message)
-			except OSERROR:
+				socket_list = [sys.stdin, server]
+				read_sockets, write_sockets, error_sockets = select.select(socket_list, [], [])
+
+				for sock in read_sockets:
+					if sock == server:
+						data = sock.recv(4096)
+						if not data:
+							print('\ndisconnected from server')
+							sys.exit()
+						else:
+							message = str(data.decode("utf-8"))
+							messageList.insert(END, message)
+			except:
 				break
 	def onClosing():
 		chatWindow.destroy()
@@ -63,7 +59,7 @@ def connect():
 	messageBox.set("")
 
 	scrollbar = tk.Scrollbar(messagesFrame)  
-	
+
 	# Contain messages in a listbox
 	messageList = tk.Listbox(messagesFrame, height=15, width=50, yscrollcommand=scrollbar.set)
 	scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -98,8 +94,8 @@ def connect():
 	chatWindow.geometry('%dx%d+%d+%d' % (w, h, x, y))
 
 
-	chatWindow.mainloop()
-	
+	chatWindow.mainloop()	
+
 ########################
 #      Main Window     #
 ########################
