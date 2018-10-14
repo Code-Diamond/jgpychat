@@ -2,7 +2,7 @@
 import socket 
 import select 
 import sys 
-from thread import *
+import thread
 #Cmd line server for jgpychat
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
@@ -49,6 +49,6 @@ while True:
     conn, addr = server.accept() 
     clients.append(conn)   
     print (addr[0] + " connected")
-    start_new_thread(clientThread,(conn,addr))     
+    thread.start_new_thread(clientThread,(conn,addr))     
 conn.close() 
 server.close() 
